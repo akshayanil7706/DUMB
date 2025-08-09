@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ultimate Chaotic Dumb Quiz</title>
+  <style>
+    body {
+      background: linear-gradient(120deg, #ffecd2 0%, #fcb69f 50%, #a1c4fd 100%);
+      animation: bgMove 10s ease-in-out infinite alternate;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+    @keyframes bgMove {
+      0% { background: linear-gradient(120deg, #ffecd2 0%, #fcb69f 50%, #a1c4fd 100%); }
+      50% { background: linear-gradient(120deg, #fcb69f 0%, #a1c4fd 50%, #ffecd2 100%); }
+      100% { background: linear-gradient(120deg, #a1c4fd 0%, #ffecd2 50%, #fcb69f 100%); }
+    }
+    .quiz-card {
+      background: #181818;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border-radius: 18px;
+      padding: 40px 32px 32px 32px;
+      max-width: 450px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .quiz-card.shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    .header-bar {
+      width: 100%;
+      background: #222;
+      color: #ffd700;
+      font-size: 2rem;
+      font-weight: bold;
+      padding: 18px 0 12px 0;
+      border-radius: 14px 14px 0 0;
+      text-align: center;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    #username-box {
+      margin-bottom: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    #username-input {
+      padding: 10px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #222;
+      color: #ffd700;
+      width: 60%;
+      min-width: 200px;
+    }
+    #question-box {
+      font-size: 1.3rem;
+      background: #d0c9c9; /* changed from #222 to white */
+      border: 2px dashed #ffd700;
+      color: #222; /* ensure text is visible on white */
+      padding: 24px 16px;
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 18px;
+      margin-top: 10px;
+      min-height: 80px;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    .question-glow {
+      box-shadow: 0 0 20px #ffd700;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .btns {
+      margin-top: 18px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background-color: #444;
+      color: #ffd700;
+      padding: 12px 22px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: relative;
+    }
+    button:hover {
+      background-color: #ffd700;
+      color: #222;
+      transform: scale(1.05);
+    }
+    .chaos-button {
+      animation: wiggle 2s infinite;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(2deg); }
+      75% { transform: rotate(-2deg); }
+    }
+    .moving-button {
+      position: relative;
+      animation: move 3s infinite;
+    }
+    @keyframes move {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(20px); }
+    }
+    #result {
+      font-size: 1.3rem;
+      margin-top: 24px;
+      color: #ffd700;
+      text-align: center;
+      min-height: 32px;
+    }
+    #dumb-meter {
+      margin-bottom: 18px;
+      width: 100%;
+      background: #222;
+      border-radius: 10px;
+      padding: 16px 12px 10px 12px;
+      box-sizing: border-box;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    #meter-fill {
+      height: 100%;
+      width: 0%;
+      background: red;
+      transition: width 0.5s;
+      border-radius: 10px;
+      position: relative;
+    }
+    .meter-bar {
+      background: #333;
+      width: 100%;
+      max-width: 300px;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .chaos-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .chaos-text {
+      position: absolute;
+      color: #ff0000;
+      font-weight: bold;
+      font-size: 2rem;
+      animation: chaosFloat 3s ease-out forwards;
+    }
+    @keyframes chaosFloat {
+      0% { opacity: 1; transform: scale(0.5); }
+      50% { opacity: 0.8; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(0.8) translateY(-100px); }
+    }
+    .roast-box {
+      background: #ff0000;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+      font-weight: bold;
+      animation: slideIn 0.5s ease-out;
+      text-align: center;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .easter-egg {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffd700, #ff6b35);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .combo-counter {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      background: #ff6b35;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .glitch {
+      animation: glitch 0.3s;
+    }
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+    .special-question {
+      background: linear-gradient(45deg, #ff6b35, #ffd700);
+      color: #000;
+      font-weight: bold;
+      animation: rainbow 2s infinite;
+    }
+    @keyframes rainbow {
+      0% { background: linear-gradient(45deg, #ff6b35, #ffd700); }
+      50% { background: linear-gradient(45deg, #ffd700, #ff6b35); }
+      100% { background: linear-gradient(45deg, #ff6b35, #ffd700); }
+    }
+    #multiplier {
+      color: #ff6b35;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 10px 0;
+    }
+    .floating-emojis {
+      position: fixed;
+      font-size: 2rem;
+      animation: floatUp 4s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-200px) rotate(360deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chaos-overlay" id="chaos-overlay"></div>
+  
+  <!-- Loading page -->
+  <div id="loading-page" style="position:fixed; inset:0; background:#ded5d5; color:#ffd700; z-index:10001; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Comic Sans MS',cursive;">
+    <div style="font-size:2.7rem; font-weight:bold; margin-bottom:18px; letter-spacing:2px;">🧠 CHAOS MASTER 🧠</div>
+    <div style="font-size:1.2rem; margin-bottom:28px;">Initializing maximum chaos...</div>
+    <div style="width:60px; height:60px; border:6px solid #ffd700; border-top:6px solid #222; border-radius:50%; animation:spin 1s linear infinite;"></div>
+  </div>
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+
+  <div id="start-page" style="position:absolute; inset:0; background:#111; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="font-size:2.4rem; color:#d2691e; margin-bottom:18px; font-family:'Comic Sans MS',cursive; font-weight:bold;">
+      🎪 Welcome to the ULTIMATE Chaos Experience! 🎪
+    </div>
+    <div style="font-size:1.15rem; color:#ffd700; margin-bottom:18px; max-width:400px; text-align:center; background:#222; padding:20px; border-radius:15px;">
+      <strong>⚠️ NEW CHAOS FEATURES:</strong><br>
+      🎯 Dynamic difficulty that adapts to you<br>
+      🤖 AI-powered roasts based on your answers<br>
+      🎮 Special power-ups and combo system<br>
+      🌟 Hidden easter eggs and secret questions<br>
+      🔥 Real-time chaos events during the quiz<br>
+      <br>
+      <span style="color:#ff0000;">Warning:</span> This quiz may cause uncontrollable laughter!
+    </div>
+    <div style="display:flex; gap:24px; margin-bottom:10px;">
+      <button id="start-yes" style="background:#ffd700; color:#222; font-size:1.3rem; padding:16px 38px; border-radius:12px; border:none; cursor:pointer; box-shadow:0 2px 8px #ffd70055;">🚀 BRING THE CHAOS!</button>
+      <button id="start-no" style="background:#444; color:#ffd700; font-size:1.3rem; padding:16px 38px; border-radius:12px; border:none; cursor:pointer; box-shadow:0 2px 8px #ffd70055;">🐌 I'm too scared!</button>
+    </div>
+    <div id="excuse-msg" style="font-size:1.1rem; color:#d2691e; margin-top:12px; min-height:28px;"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="easter-egg" onclick="activateEasterEgg()" title="Click me for chaos!">🎭</div>
+    
+    <div style="width:100%; background:#ffd70022; color:#d2691e; border-radius:12px; padding:12px 10px; margin-bottom:12px; font-size:1.08rem; text-align:center; box-shadow:0 2px 8px #ffd70033;">
+      <b>🏆 ULTIMATE CHAOS COMPETITION!</b><br>
+      Now with AI roasts, dynamic difficulty, and secret power-ups!<br>
+      The ultimate winner gets the legendary title of <span style="color:#ff0000;font-weight:bold;">"Chaos Master Supreme"</span>!<br>
+      <span style="font-size:0.98rem; color:#060606;">🎪 Prepare for maximum mayhem! 🎪</span>
+    </div>
+
+    <div class="header-bar">🧠 CHAOS QUIZ <span style="font-size:1.1rem;">- ∞ Madness</span></div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    
+    <div id="multiplier" style="display:none;">🔥 Chaos Multiplier: x1</div>
+    
+    <div id="username-box">
+      <input type="text" id="username-input" placeholder="Enter your chaos name...">
+      <button onclick="startQuiz()">🚀 Begin Chaos</button>
+    </div>
+
+    <div id="dumb-meter" style="margin-bottom: 18px; position: relative;">
+      <div style="font-size: 1.1rem; margin-bottom: 5px; color:#ffd700;">Chaos Meter:</div>
+      <div class="meter-bar">
+        <div id="meter-fill"></div>
+      </div>
+      <div id="dumb-message" style="margin-top: 10px; font-size: 1.1rem; color: #ffd700; font-weight: bold;"></div>
+      <div id="dumb-fact" style="margin-top: 8px; font-size: 1.05rem; color: #fffbe6; font-style: italic; text-align: center; min-height: 22px;"></div>
+    </div>
+
+    <div id="question-box" style="display:none;">Loading chaos question...</div>
+    
+    <div id="roast-container"></div>
+    
+    <div class="btns" style="display:none;">
+      <button type="button" id="yes-btn" onclick="handleAnswerWithChaos('yes')">Yes 😅</button>
+      <button type="button" id="no-btn" onclick="handleAnswerWithChaos('no')">No 😎</button>
+      <button type="button" id="chaos-btn" onclick="chaosAnswer()" style="display:none; background:#ff6b35;">🎪 CHAOS!</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      "Are you dumb?",
+      "Did you microwave ice cream to make it colder?",
+      "Have you failed a CAPTCHA?",
+      "Do you eat pizza with a spoon?",
+      "Is gravity optional?",
+      "Are you allergic to common sense?",
+      "Do you think chairs have feelings?",
+      "Have you ever argued with a mirror?",
+      "Have you tried downloading more RAM?",
+      "Do you think pigeons are government spies?",
+      "Have you ever lost to a bot?",
+      "Is your life sponsored by procrastination?",
+      "Are you just a human-shaped anxiety?",
+      "Did you Google 'how to breathe'?",
+      "Is cereal a soup?",
+      "Do you treat red flags as green ones?",
+      "Have you ever cried over spilled milk (literally)?",
+      "Are you the clown of your own circus?",
+      "Have you named your houseplant Steve?",
+      "Is your brain buffering right now?",
+      "Have you ever texted a toaster?",
+      "Do you panic when someone says 'let's talk'?",
+      "Have you practiced fake arguments in the shower?",
+      "Do you laugh at your own jokes?",
+      "Are you a raccoon in disguise?",
+      "Have you ever screamed at your WiFi?",
+      "Do you believe clouds are cotton candy?",
+      "Have you ever eaten soap?",
+      "Do you clap when the airplane lands?",
+      "Is your best friend imaginary?",
+      "Do you wear socks to sleep?",
+      "Have you ever hugged a tree and cried?",
+      "Are you fluent in sarcasm?",
+      "Did you try to fix WiFi by hitting the router?",
+      "Do you argue with your pet?",
+      "Is your spirit animal a potato?",
+      "Can you drown in air?",
+      "Have you ever apologized to an object?",
+      "Do you think plants scream when eaten?",
+      "Have you replied to your own message?",
+      "Is thinking your superpower?",
+      "Have you blamed your stupidity on Google?",
+      "Do you talk to yourself and lose the argument?",
+      "Did you eat today just to survive?",
+      "Have you tried to reboot your brain?",
+      "Do you panic when your phone is at 99%?",
+      "Have you read this far and regretted it?",
+      "Are you trying to outsmart this page?",
+      "Is your pillow your therapist?",
+      "Are you emotionally attached to your charger?"
+    ];
+
+    const specialQuestions = [
+      "🌟 SPECIAL: If you could be any kitchen appliance, would you be a confused blender?",
+      "🎪 CHAOS QUESTION: Do you think this quiz is secretly judging your life choices?",
+      "🔥 ULTIMATE: Are you the reason aliens won't visit Earth?",
+      "⚡ POWER-UP: Do you believe you're living in a simulation run by caffeinated hamsters?"
+    ];
+
+    const roastBank = [
+      "Wow, that answer was... something. 🤦‍♂️",
+      "I've seen smarter decisions from a broken calculator.",
+      "Your brain is like Internet Explorer - it tries its best.",
+      "That answer made my circuits question reality.",
+      "Congratulations, you've achieved peak chaos energy!",
+      "I'm updating my definition of 'unique thinking'...",
+      "Your logic is so advanced, it's gone backwards.",
+      "That's not how any of this works, but okay!",
+      "You're redefining the laws of common sense.",
+      "My AI is having an existential crisis because of you."
+    ];
+
+    const chaosFacts = [
+      "CHAOS FACT: Your brain uses 20% of your body's energy, but yours might be on power-saving mode.",
+      "MIND-BLOW: There are more possible games of chess than atoms in the observable universe. Unlike your last decision.",
+      "REALITY CHECK: Dolphins have names for each other. Do you even remember yours?",
+      "CHAOS THEORY: A butterfly flapping its wings can cause a tornado. You answering 'yes' causes me to question existence.",
+      "UNIVERSE FACT: We're made of star dust. Some of us are just more... dusty.",
+      "PHYSICS: Time slows down when you're moving fast. Yours seems to have stopped completely.",
+      "BIOLOGY: Your brain has 86 billion neurons. I'm trying to find the active ones.",
+      "QUANTUM: Schrödinger's cat is both alive and dead. Your logic is both right and... no, just wrong.",
+      "SPACE: Light travels at 186,000 miles per second. Your thoughts travel at... 3 mph?",
+      "MATH: Infinity is a concept beyond human comprehension. So is your reasoning."
+    ];
+
+    let selectedQuestions = [];
+    let currentIndex = 0;
+    let yesCount = 0;
+    let noCount = 0;
+    let chaosCount = 0;
+    let username = "";
+    let chaosMultiplier = 1;
+    let combo = 0;
+    let specialQuestionsUsed = 0;
+
+    // Enhanced quiz functions
+    function startQuiz() {
+      username = document.getElementById("username-input").value.trim() || "Anonymous Chaos Agent";
+      document.getElementById("username-box").style.display = "none";
+      selectedQuestions = generateDynamicQuestions(20);
+      currentIndex = 0;
+      yesCount = 0;
+      noCount = 0;
+      chaosCount = 0;
+      document.getElementById("question-box").style.display = "block";
+      document.querySelector(".btns").style.display = "flex";
+      document.getElementById("result").textContent = "";
+      document.getElementById("dumb-meter").style.display = "flex";
+      document.getElementById("multiplier").style.display = "block";
+      updateProgressBar();
+      updateChaosMultiplier();
+      showQuestion();
+      triggerRandomChaosEvent();
+    }
+
+    function generateDynamicQuestions(count) {
+      let questions = [...allQuestions];
+      // Add special questions based on difficulty
+      if (Math.random() > 0.7) {
+        questions = questions.concat(specialQuestions);
+      }
+      const shuffled = questions.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function showQuestion() {
+      if (currentIndex < selectedQuestions.length) {
+        const questionBox = document.getElementById("question-box");
+        const question = selectedQuestions[currentIndex];
+        
+        questionBox.textContent = (currentIndex + 1) + ". " + question;
+        
+        // Special question styling
+        if (question.includes("🌟") || question.includes("🎪") || question.includes("🔥") || question.includes("⚡")) {
+          questionBox.classList.add("special-question");
+          showChaosButton();
+        } else {
+          questionBox.classList.remove("special-question");
+          hideChaosButton();
+        }
+        
+        // Random chaos effects
+        if (Math.random() > 0.7) {
+          addChaosEffect();
+        }
+        
+        updateProgressBar();
+      } else {
+        showFinalResults();
+      }
+    }
+
+    function showChaosButton() {
+      document.getElementById("chaos-btn").style.display = "block";
+    }
+
+    function hideChaosButton() {
+      document.getElementById("chaos-btn").style.display = "none";
+    }
+
+    function handleAnswerWithChaos(answer) {
+      // Generate AI roast
+      generateRoast(answer);
+      
+      if (answer === 'yes') {
+        yesCount++;
+        combo++;
+        createFloatingEmoji("🤪", Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+      } else {
+        noCount++;
+        combo = Math.max(0, combo - 1);
+        createFloatingEmoji("🧠", Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+      }
+      
+      updateChaosMultiplier();
+      updateProgressBar();
+      playRandomSound();
+      currentIndex++;
+      showQuestion();
+      
+      // Random chaos events
+      if (Math.random() > 0.6) {
+        triggerRandomChaosEvent();
+      }
+    }
+
+    function chaosAnswer() {
+      chaosCount++;
+      combo += 3;
+      generateChaosRoast();
+      createChaosExplosion();
+      updateChaosMultiplier();
+      updateProgressBar();
+      currentIndex++;
+      showQuestion();
+    }
+
+    function generateRoast(answer) {
+      const roastContainer = document.getElementById("roast-container");
+      const roast = roastBank[Math.floor(Math.random() * roastBank.length)];
+      
+      const roastBox = document.createElement("div");
+      roastBox.className = "roast-box";
+      roastBox.textContent = roast;
+      roastContainer.appendChild(roastBox);
+      
+      setTimeout(() => {
+        roastBox.remove();
+      }, 3000);
+    }
+
+    function generateChaosRoast() {
+      const roastContainer = document.getElementById("roast-container");
+      const roastBox = document.createElement("div");
+      roastBox.className = "roast-box";
+      roastBox.style.background = "#ff6b35";
+      roastBox.textContent = "🎪 CHAOS UNLEASHED! You've broken the matrix! 🎪";
+      roastContainer.appendChild(roastBox);
+      
+      setTimeout(() => {
+        roastBox.remove();
+      }, 4000);
+    }
+
+    function updateChaosMultiplier() {
+      chaosMultiplier = 1 + (combo * 0.1) + (chaosCount * 0.5);
+      document.getElementById("multiplier").textContent = `🔥 Chaos Multiplier: x${chaosMultiplier.toFixed(1)}`;
+      
+      if (combo >= 5) {
+        document.getElementById("multiplier").innerHTML += ` <span style="color:#ff6b35;">COMBO x${combo}!</span>`;
+      }
+    }
+
+    function updateProgressBar() {
+      const progress = (currentIndex / selectedQuestions.length) * 100;
+      document.getElementById("progress-fill").style.width = progress + "%";
+    }
+
+    function triggerRandomChaosEvent() {
+      const events = [
+        () => makeButtonsWiggle(),
+        () => shakeQuizCard(),
+        () => createChaosText(),
+        () => changeButtonPositions(),
+        () => addGlitchEffect()
+      ];
+      
+      const randomEvent = events[Math.floor(Math.random() * events.length)];
+      randomEvent();
+    }
+
+    function makeButtonsWiggle() {
+      const buttons = document.querySelectorAll(".btns button");
+      buttons.forEach(btn => {
+        btn.classList.add("chaos-button");
+        setTimeout(() => btn.classList.remove("chaos-button"), 3000);
+      });
+    }
+
+    function shakeQuizCard() {
+      document.querySelector(".quiz-card").classList.add("shake");
+      setTimeout(() => document.querySelector(".quiz-card").classList.remove("shake"), 500);
+    }
+
+    function createChaosText() {
+      const chaosTexts = ["CHAOS!", "MAYHEM!", "MADNESS!", "ANARCHY!", "PANDEMONIUM!"];
+      const text = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
+      
+      const chaosElement = document.createElement("div");
+      chaosElement.className = "chaos-text";
+      chaosElement.textContent = text;
+      chaosElement.style.left = Math.random() * window.innerWidth + "px";
+      chaosElement.style.top = Math.random() * window.innerHeight + "px";
+      
+      document.getElementById("chaos-overlay").appendChild(chaosElement);
+      
+      setTimeout(() => chaosElement.remove(), 3000);
+    }
+
+    function changeButtonPositions() {
+      const yesBtn = document.getElementById("yes-btn");
+      const noBtn = document.getElementById("no-btn");
+      
+      if (Math.random() > 0.5) {
+        yesBtn.classList.add("moving-button");
+        setTimeout(() => yesBtn.classList.remove("moving-button"), 3000);
+      } else {
+        noBtn.classList.add("moving-button");
+        setTimeout(() => noBtn.classList.remove("moving-button"), 3000);
+      }
+    }
+
+    function addGlitchEffect() {
+      document.getElementById("question-box").classList.add("glitch");
+      setTimeout(() => document.getElementById("question-box").classList.remove("glitch"), 300);
+    }
+
+    function addChaosEffect() {
+      document.getElementById("question-box").classList.add("question-glow");
+      setTimeout(() => document.getElementById("question-box").classList.remove("question-glow"), 2000);
+    }
+
+    function createFloatingEmoji(emoji, x, y) {
+      const floatingEmoji = document.createElement("div");
+      floatingEmoji.className = "floating-emojis";
+      floatingEmoji.textContent = emoji;
+      floatingEmoji.style.left = x + "px";
+      floatingEmoji.style.top = y + "px";
+      
+      document.body.appendChild(floatingEmoji);
+      
+      setTimeout(() => floatingEmoji.remove(), 4000);
+    }
+
+    function createChaosExplosion() {
+      const emojis = ["🎪", "🎭", "🎨", "🎪", "⚡", "🔥", "✨", "🌟"];
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+          createFloatingEmoji(
+            emojis[Math.floor(Math.random() * emojis.length)],
+            Math.random() * window.innerWidth,
+            Math.random() * window.innerHeight
+          );
+        }, i * 200);
+      }
+      shakeQuizCard();
+    }
+
+    function playRandomSound() {
+      // You can add actual sound effects here
+      console.log("🔊 Chaos sound effect!");
+    }
+
+    function activateEasterEgg() {
+      createChaosExplosion();
+      createChaosText();
+      shakeQuizCard();
+      makeButtonsWiggle();
+      // Optionally show a roast
+      generateChaosRoast();
+    }
+
+    // Fix: showFinalResults should show the personality page first, then result
+    function showFinalResults() {
+      showPersonalityPage();
+    }
+
+    // Fix: showPersonalityPage should allow showing result after
+    function showPersonalityPage() {
+      document.getElementById("question-box").style.display = 'none';
+      document.querySelector(".btns").style.display = 'none';
+      document.getElementById("dumb-meter").style.display = "none";
+      // If not already present, create personality-page
+      let personalityPage = document.getElementById("personality-page");
+      if (!personalityPage) {
+        personalityPage = document.createElement("div");
+        personalityPage.id = "personality-page";
+        personalityPage.style.cssText = "display:flex; position:absolute; inset:0; background:#222; color:#ffd700; z-index:10001; flex-direction:column; align-items:center; justify-content:center; font-family:'Comic Sans MS',cursive;";
+        personalityPage.innerHTML = `
+          <div style="font-size:2rem; margin-top:48px; margin-bottom:18px;">🔮 Your Personality Prediction</div>
+          <div id="personality-desc" style="font-size:1.18rem; background:#181818; border-radius:14px; padding:28px 22px; max-width:340px; margin-bottom:28px; box-shadow:0 2px 12px #ffd70033; color:#ffd700; text-align:center;"></div>
+          <button id="show-result-btn" style="background:#ffd700; color:#222; font-size:1.15rem; padding:12px 32px; border-radius:10px; border:none; cursor:pointer; box-shadow:0 2px 8px #ffd70055;">See My Chaos Meter Result</button>
+        `;
+        document.body.appendChild(personalityPage);
+      } else {
+        personalityPage.style.display = "flex";
+      }
+      // Personality logic based on yesCount
+      let desc = "";
+      if (yesCount >= 13) {
+        desc = "You are a <b>Legendary Goofball</b>! 🤪<br>Wild, unpredictable, and always the life of the party. Your mind is a meme factory and you embrace chaos with style!";
+      } else if (yesCount >= 9) {
+        desc = "You are a <b>Fun-Loving Clown</b>! 🤡<br>People love your energy and humor. You see the world in your own unique way and never shy away from a silly moment.";
+      } else if (yesCount >= 5) {
+        desc = "You are a <b>Chill Dreamer</b>! 😎<br>Easy-going, creative, and sometimes lost in thought. You balance fun and wisdom, and your friends appreciate your quirky side.";
+      } else {
+        desc = "You are a <b>Secret Genius</b>! 🧠<br>Smart, sharp, and always a step ahead. You dodge the dumb and keep your cool, but you still know how to have fun!";
+      }
+      document.getElementById("personality-desc").innerHTML = desc;
+      document.getElementById("show-result-btn").onclick = function() {
+        personalityPage.style.display = "none";
+        document.getElementById("dumb-meter").style.display = "flex";
+        showResult();
+      };
+    }
+
+    // Fix: showResult should not hide dumb-meter
+    function showResult() {
+      document.getElementById("question-box").style.display = 'none';
+      document.querySelector(".btns").style.display = 'none';
+      // Do not hide dumb-meter
+      // document.getElementById("dumb-meter").style.display = "none";
+      // ...existing code for result...
+      // ...existing code...
+    }
+
+    // Fix loading page logic so it always shows first, then start page, then quiz
+    document.addEventListener("DOMContentLoaded", function() {
+      // Show loading page first
+      document.getElementById('loading-page').style.display = 'flex';
+      document.getElementById('start-page').style.display = 'none';
+      document.querySelector('.quiz-card').style.display = 'none';
+
+      setTimeout(function() {
+        document.getElementById('loading-page').style.display = 'none';
+        document.getElementById('start-page').style.display = 'flex';
+        document.body.style.cursor = 'auto';
+        document.querySelector('.quiz-card').style.display = 'none';
+      }, 1200);
+
+      // Start button logic
+      document.getElementById('start-yes').onclick = function() {
+        document.getElementById('start-page').style.display = 'none';
+        document.querySelector('.quiz-card').style.display = 'flex';
+        document.body.style.cursor = 'auto';
+      };
+
+      document.getElementById('start-no').onclick = function() {
+        // Show a random excuse message
+        const excuses = [
+          "My mouse is acting weird!",
+          "I’m too smart for this quiz!",
+          "I need a nap first!",
+          "My phone battery is low!",
+          "I’m saving my brainpower for later!"
+        ];
+        const excuseMsg = document.getElementById('excuse-msg');
+        excuseMsg.textContent = "Excuse used: " + excuses[Math.floor(Math.random() * excuses.length)];
+      };
+    });
+  </script>
+</body>
+</html>
